@@ -1,34 +1,31 @@
-use ignore::Walk;
-use std::fs::File;
-use std::io::{BufReader, Read};
-use std::path::PathBuf;
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[derive(Debug)]
-struct ParsedFile {
-    path: PathBuf,
-    body: String,
-}
+use complexity::*;
+use ignore::{DirEntry, WalkBuilder, WalkState};
 
 fn main() {
-    println!("hello world");
+    let mut builder = WalkBuilder::new("./");
+    builder.filter_entry(|e| FilesFilter::default().matches(e));
 
-    Walk::new("./")
-        .filter_map(|result| {
-            result
-                .ok()
-                .and_then(|entry| get_file_contents(entry.path().to_path_buf()).ok())
+    builder.build_parallel().run(|| {
+        Box::new(|result| {
+            render_result(result);
+
+            WalkState::Continue
         })
-        .for_each(|v| println!("{:?}", v));
+    });
 }
 
-fn get_file_contents(path: PathBuf) -> std::io::Result<ParsedFile> {
-    let file = File::open(&path)?;
-    let mut buf_reader = BufReader::new(file);
-    let mut contents = String::new();
-    buf_reader.read_to_string(&mut contents)?;
-
-    Ok(ParsedFile {
-        path,
-        body: contents,
-    })
+fn render_result(result: Result<DirEntry, ignore::Error>) {
+    if let Some(parsed_file) = result
+        .ok()
+        .and_then(|entry| ParsedFile::new(entry.path().to_path_buf()).ok())
+    {
+        println!(
+            "{:>8} {}",
+            format!("{:.2}", parsed_file.complexity_score),
+            parsed_file.path.display()
+        );
+    }
 }
