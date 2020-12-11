@@ -4,8 +4,23 @@ use structopt::StructOpt;
 
 pub fn run() {
     let flags = flags::Flags::from_args();
+
+    match flags.cmd {
+        Some(flags::Command::InstallConfiguration) => match configuration::install() {
+            Some(path) => println!("Installed configuration successfully at {}", path.display()),
+            None => println!("Error installing configuration"),
+        },
+        None => calculate_complexity(flags),
+    }
+}
+
+fn calculate_complexity(flags: flags::Flags) {
     let mut builder = WalkBuilder::new("./");
-    let mut files_filter = FilesFilter::default();
+    let parsed_value =
+        configuration::load_and_parse_config().and_then(|v| IgnoredFilter::from_file(&v).ok());
+    let mut files_filter: FilesFilter = parsed_value
+        .map(|v| v.into())
+        .unwrap_or(FilesFilter::default());
 
     flags
         .ignore

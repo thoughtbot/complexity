@@ -1,5 +1,6 @@
 pub mod cli;
 mod complexity_score;
+pub mod configuration;
 mod files_filter;
 pub mod flags;
 mod parsed_file;

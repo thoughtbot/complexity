@@ -1,39 +1,62 @@
-use std::ffi::OsStr;
+use serde::Deserialize;
+use std::ffi::OsString;
 
-pub struct FilesFilter<'a> {
-    ignored_extensions: Vec<&'a OsStr>,
+pub struct FilesFilter {
+    ignored_extensions: Vec<OsString>,
     pub ignored_paths: Vec<String>,
     pub only_paths: Vec<String>,
 }
 
-impl<'a> Default for FilesFilter<'a> {
+#[derive(Debug, PartialEq, Deserialize)]
+pub struct IgnoredFilter {
+    #[serde(default)]
+    ignored_extensions: Vec<String>,
+    #[serde(default)]
+    ignored_paths: Vec<String>,
+}
+
+impl IgnoredFilter {
+    pub fn from_file(body: &str) -> Result<Self, serde_yaml::Error> {
+        serde_yaml::from_str(body)
+    }
+}
+
+impl std::convert::From<IgnoredFilter> for FilesFilter {
+    fn from(input: IgnoredFilter) -> Self {
+        let ignored_extensions = input
+            .ignored_extensions
+            .into_iter()
+            .map(|v| OsString::from(v))
+            .collect::<Vec<_>>();
+
+        let ignored_paths = input.ignored_paths;
+
+        FilesFilter {
+            ignored_extensions,
+            ignored_paths,
+            ..FilesFilter::default()
+        }
+    }
+}
+
+impl Default for FilesFilter {
     fn default() -> Self {
         Self {
-            ignored_extensions: vec![
-                OsStr::new("json"),
-                OsStr::new("lock"),
-                OsStr::new("toml"),
-                OsStr::new("yml"),
-                OsStr::new("yaml"),
-                OsStr::new("md"),
-                OsStr::new("markdown"),
-                OsStr::new("xml"),
-                OsStr::new("svg"),
-            ],
-            ignored_paths: vec!["vendor".to_string()],
+            ignored_extensions: vec![],
+            ignored_paths: vec![],
             only_paths: vec![],
         }
     }
 }
 
-impl<'a> FilesFilter<'a> {
+impl FilesFilter {
     pub fn matches(&self, path: &std::path::Path) -> bool {
         self.approved_extension(path) && self.approved_path(path) && self.only_path(path)
     }
 
     fn approved_extension(&self, path: &std::path::Path) -> bool {
         match path.extension() {
-            Some(ext) => !self.ignored_extensions.contains(&ext),
+            Some(ext) => !self.ignored_extensions.contains(&ext.to_os_string()),
             None => true,
         }
     }
@@ -63,6 +86,7 @@ impl<'a> FilesFilter<'a> {
 mod tests {
     use super::*;
     use std::path::Path;
+    use totems::assert_contains;
 
     #[test]
     fn only_path_allows_directories() {
@@ -74,5 +98,16 @@ mod tests {
         assert!(files_filter.only_path(Path::new("./src/")));
         assert!(files_filter.only_path(Path::new("./src/nested.js")));
         assert!(!files_filter.only_path(Path::new("./src/nested.rb")));
+    }
+
+    #[test]
+    fn parsing_provided_yaml() {
+        let provided_yaml = include_str!("templates/config.yml");
+
+        let parsed_value = IgnoredFilter::from_file(&provided_yaml).unwrap();
+        // assert_contains!(&parsed_value.ignored_paths, "vendor");
+        assert_contains!(&parsed_value.ignored_extensions, "xml");
+        assert_contains!(&parsed_value.ignored_extensions, "svg");
+        assert_contains!(&parsed_value.ignored_extensions, "lock");
     }
 }

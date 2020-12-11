@@ -1,6 +1,12 @@
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
+pub enum Command {
+    /// Write the default YAML configuration to the configuration directory
+    InstallConfiguration,
+}
+
+#[derive(Debug, StructOpt)]
 #[structopt(
     name = "complexity",
     about = "A command line tool to identify complex code",
@@ -17,4 +23,7 @@ pub struct Flags {
     /// This supports providing multiple values with a comma-delimited list
     #[structopt(long, use_delimiter = true)]
     pub only: Vec<String>,
+
+    #[structopt(subcommand)]
+    pub cmd: Option<Command>,
 }

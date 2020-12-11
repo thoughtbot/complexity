@@ -1,0 +1,14 @@
+ignored_extensions:
+  - json
+  - lock
+  - toml
+  - yml
+  - yaml
+  - md
+  - markdown
+  - xml
+  - svg
+  - html
+ignored_paths:
+  - vendor
+  - public
