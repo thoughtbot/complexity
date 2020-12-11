@@ -22,6 +22,15 @@ requirements – are of considerable overlap.
 [this paper]: https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.68.3558&rep=rep1&type=pdf
 [McCabe]: https://en.wikipedia.org/wiki/Cyclomatic_complexity
 
+## Installation
+
+### MacOS with Homebrew
+
+```sh
+brew tap thoughtbot/formulae
+brew install complexity
+```
+
 ## Usage
 
 Let's grab the 20 most complex files:
