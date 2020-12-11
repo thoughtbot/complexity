@@ -1,5 +1,8 @@
 use crate::*;
 use ignore::{DirEntry, WalkBuilder, WalkState};
+use serde_json;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 
 pub fn run() {
@@ -34,24 +37,62 @@ fn calculate_complexity(flags: flags::Flags) {
 
     builder.filter_entry(move |e| files_filter.matches(e.path()));
 
+    let results = Arc::new(Mutex::new(vec![]));
+
     builder.build_parallel().run(|| {
         Box::new(|result| {
-            render_result(result);
+            if let Some(parsed_file) = parse_dir_entry(result) {
+                let mut results = results.lock().unwrap();
+                results.push(parsed_file);
+            }
 
             WalkState::Continue
         })
     });
+
+    let results = results.lock().unwrap();
+
+    match flags.format {
+        flags::Format::Standard => render_standard(&results),
+        flags::Format::Csv => render_csv(&results),
+        flags::Format::Json => render_json(&results),
+    }
 }
 
-fn render_result(result: Result<DirEntry, ignore::Error>) {
-    if let Some(parsed_file) = result
-        .ok()
-        .and_then(|entry| ParsedFile::new(entry.path().to_path_buf()).ok())
-    {
+fn render_standard(results: &[ParsedFile]) {
+    for parsed_file in results {
         println!(
             "{:>8} {}",
             format!("{:.2}", parsed_file.complexity_score),
             parsed_file.path.display()
         );
     }
+}
+
+fn render_csv(results: &[ParsedFile]) {
+    for parsed_file in results {
+        println!(
+            "{},{}",
+            parsed_file.complexity_score,
+            parsed_file.path.display()
+        );
+    }
+}
+
+fn render_json(results: &[ParsedFile]) {
+    let mut json = HashMap::new();
+    for parsed_file in results {
+        json.insert(
+            parsed_file.path.display().to_string(),
+            parsed_file.complexity_score,
+        );
+    }
+
+    println!("{}", serde_json::to_string(&json).unwrap());
+}
+
+fn parse_dir_entry(result: Result<DirEntry, ignore::Error>) -> Option<ParsedFile> {
+    result
+        .ok()
+        .and_then(|entry| ParsedFile::new(entry.path().to_path_buf()).ok())
 }

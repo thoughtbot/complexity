@@ -1,9 +1,30 @@
+use std::str::FromStr;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 pub enum Command {
     /// Write the default YAML configuration to the configuration directory
     InstallConfiguration,
+}
+
+#[derive(Debug)]
+pub enum Format {
+    Standard,
+    Csv,
+    Json,
+}
+
+impl FromStr for Format {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_ref() {
+            "standard" => Ok(Format::Standard),
+            "csv" => Ok(Format::Csv),
+            "json" => Ok(Format::Json),
+            v => Err(format!("Unknown format: {}", v)),
+        }
+    }
 }
 
 #[derive(Debug, StructOpt)]
@@ -26,4 +47,8 @@ pub struct Flags {
 
     #[structopt(subcommand)]
     pub cmd: Option<Command>,
+
+    /// Format output
+    #[structopt(long, possible_values = &["standard", "csv", "json"], default_value = "standard", case_insensitive = true)]
+    pub format: Format,
 }
