@@ -31,13 +31,68 @@ brew tap thoughtbot/formulae
 brew install complexity
 ```
 
+## Configuration
+
+`complexity` has configuration options to ignore certain file extensions or
+substrings with paths.
+
+To install this default configuration, run:
+
+```sh
+complexity install-configuration
+```
+
+This creates/overwrites a yaml configuration at
+`$HOME/.config/complexity/complexity.yml`.
+
+By default, extensions including `lock`, `toml`, `json`, and `md` are ignored.
+
+`complexity` will automatically honor `.gitignore` settings.
+
 ## Usage
+
+### Basic
 
 Let's grab the 20 most complex files:
 
 ```sh
 complexity | sort -n --reverse | head -n 20
 ```
+
+Within the [Discourse codebase], for example, here's what the output might look like:
+
+```
+  487.96 ./spec/components/guardian_spec.rb
+  465.19 ./spec/requests/users_controller_spec.rb
+  363.09 ./spec/requests/topics_controller_spec.rb
+  311.10 ./spec/models/topic_spec.rb
+  273.57 ./lib/javascripts/messageformat.js
+  266.61 ./spec/models/user_spec.rb
+  248.28 ./app/assets/javascripts/discourse/app/controllers/topic.js
+  238.81 ./app/assets/javascripts/discourse/tests/fixtures/discovery-fixtures.js
+  219.06 ./script/import_scripts/socialcast/test/test_data.rb
+  207.01 ./app/controllers/users_controller.rb
+  205.86 ./app/assets/javascripts/discourse/tests/unit/lib/pretty-text-test.js
+  202.18 ./app/assets/javascripts/discourse/tests/fixtures/topic.js
+  200.17 ./lib/search.rb
+  193.05 ./app/assets/javascripts/discourse/app/controllers/composer.js
+  191.63 ./app/models/user.rb
+  187.97 ./app/models/topic.rb
+  186.10 ./spec/components/pretty_text_spec.rb
+  179.25 ./spec/requests/session_controller_spec.rb
+  174.89 ./spec/requests/groups_controller_spec.rb
+  173.44 ./app/assets/javascripts/discourse/tests/integration/widgets/post-test.js
+```
+
+[Discourse codebase]: https://github.com/discourse/discourse
+
+### Advanced
+
+`complexity` supports alternative formatting options, like JSON and CSV.
+Additionally, you can limit results by substring with the `--only` flag, or
+modify paths to ignore with `--ignore`.
+
+You can view the full suite of options by running `complexity help`.
 
 ## License
 
