@@ -1,4 +1,4 @@
-use crate::{complexity_score, parser};
+use crate::{parser, scoring};
 use std::convert::From;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -31,8 +31,8 @@ impl ParsedFile {
             Ok(_) => Err(ParsedFileError::IncompleteParse),
             Err(_) => Err(ParsedFileError::FailedParse),
         }?;
-        let complexity_score =
-            complexity_score::score(complexity_score::ScoreConfig::default(), &stats);
+        let mut scorer = scoring::Standard::default();
+        let complexity_score = scoring::score(&mut scorer, &stats);
 
         Ok(ParsedFile {
             path,
