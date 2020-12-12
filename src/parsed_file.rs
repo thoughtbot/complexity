@@ -7,7 +7,6 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub struct ParsedFile {
     pub path: PathBuf,
-    stats: Vec<usize>,
     pub complexity_score: f32,
 }
 
@@ -36,7 +35,6 @@ impl ParsedFile {
 
         Ok(ParsedFile {
             path,
-            stats,
             complexity_score,
         })
     }
