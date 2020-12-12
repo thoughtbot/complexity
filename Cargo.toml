@@ -10,7 +10,6 @@ license = "MIT"
 [dependencies]
 ignore = "0.4"
 nom = "6"
-mimalloc = { version = "*", default-features = false }
 structopt = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
