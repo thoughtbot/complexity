@@ -41,7 +41,8 @@ fn calculate_complexity(flags: flags::Flags) {
 
     builder.build_parallel().run(|| {
         Box::new(|result| {
-            if let Some(parsed_file) = parse_dir_entry(result) {
+            let mut scorer: Box<dyn scoring::ScoreVisitor> = Box::new(scoring::Standard::default());
+            if let Some(parsed_file) = parse_dir_entry(&mut scorer, result) {
                 let mut results = results.lock().unwrap();
                 results.push(parsed_file);
             }
@@ -91,8 +92,11 @@ fn render_json(results: &[ParsedFile]) {
     println!("{}", serde_json::to_string(&json).unwrap());
 }
 
-fn parse_dir_entry(result: Result<DirEntry, ignore::Error>) -> Option<ParsedFile> {
+fn parse_dir_entry(
+    mut scorer: &mut Box<dyn scoring::ScoreVisitor>,
+    result: Result<DirEntry, ignore::Error>,
+) -> Option<ParsedFile> {
     result
         .ok()
-        .and_then(|entry| ParsedFile::new(entry.path().to_path_buf()).ok())
+        .and_then(|entry| ParsedFile::new(&mut scorer, entry.path().to_path_buf()).ok())
 }

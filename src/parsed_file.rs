@@ -23,15 +23,17 @@ impl From<std::io::Error> for ParsedFileError {
 }
 
 impl ParsedFile {
-    pub fn new(path: PathBuf) -> Result<Self, ParsedFileError> {
+    pub fn new(
+        scorer: &mut Box<dyn scoring::ScoreVisitor>,
+        path: PathBuf,
+    ) -> Result<Self, ParsedFileError> {
         let contents = get_file_contents(&path)?;
         let stats = match parser::parse_file(&contents) {
             Ok(("", stats)) => Ok(stats),
             Ok(_) => Err(ParsedFileError::IncompleteParse),
             Err(_) => Err(ParsedFileError::FailedParse),
         }?;
-        let mut scorer = scoring::Standard::default();
-        let complexity_score = scoring::score(&mut scorer, &stats);
+        let complexity_score = scoring::score(scorer, &stats);
 
         Ok(ParsedFile {
             path,

@@ -11,7 +11,7 @@ pub trait ScoreVisitor {
     fn score(&self) -> f32;
 }
 
-pub fn score<V: ScoreVisitor>(visitor: &mut V, input: &[usize]) -> f32 {
+pub fn score(visitor: &mut Box<dyn ScoreVisitor>, input: &[usize]) -> f32 {
     let line_length = input.len();
 
     visitor.visit_line_length(line_length);
@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn simple_case() {
-        let mut scorer = Standard::default();
+        let mut scorer: Box<dyn ScoreVisitor> = Box::new(Standard::default());
 
         assert!(abs_diff_eq!(
             score(&mut scorer, &vec![0, 2, 0]),
@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn empty_file() {
-        let mut scorer = Standard::default();
+        let mut scorer: Box<dyn ScoreVisitor> = Box::new(Standard::default());
 
         assert!(abs_diff_eq!(
             score(&mut scorer, &vec![]),
@@ -100,10 +100,10 @@ mod tests {
             }
         }
 
-        let mut visitor = Custom {
+        let mut visitor: Box<dyn ScoreVisitor> = Box::new(Custom {
             acc: 5.0,
             line_length: 0,
-        };
+        });
         assert!(abs_diff_eq!(
             score(&mut visitor, &vec![0, 2, 4, 4, 4, 2, 2, 2, 2, 0]),
             2.2,
@@ -124,7 +124,7 @@ mod tests {
             0, // + 0
         ];
 
-        let mut scorer = Standard::default();
+        let mut scorer: Box<dyn ScoreVisitor> = Box::new(Standard::default());
         assert!(abs_diff_eq!(
             score(&mut scorer, &lines),
             2.2578,
