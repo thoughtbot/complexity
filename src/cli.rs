@@ -38,10 +38,11 @@ fn calculate_complexity(flags: flags::Flags) {
     builder.filter_entry(move |e| files_filter.matches(e.path()));
 
     let results = Arc::new(Mutex::new(vec![]));
+    let scorer = flags.scorer;
 
     builder.build_parallel().run(|| {
         Box::new(|result| {
-            let mut scorer: Box<dyn scoring::ScoreVisitor> = Box::new(scoring::Standard::default());
+            let mut scorer = build_scorer(&scorer);
             if let Some(parsed_file) = parse_dir_entry(&mut scorer, result) {
                 let mut results = results.lock().unwrap();
                 results.push(parsed_file);
@@ -57,6 +58,13 @@ fn calculate_complexity(flags: flags::Flags) {
         flags::Format::Standard => render_standard(&results),
         flags::Format::Csv => render_csv(&results),
         flags::Format::Json => render_json(&results),
+    }
+}
+
+fn build_scorer(algorithm: &flags::ScoringAlgorithm) -> Box<dyn scoring::ScoreVisitor> {
+    match algorithm {
+        flags::ScoringAlgorithm::Standard => Box::new(scoring::Standard::default()),
+        flags::ScoringAlgorithm::Length => Box::new(scoring::Length::default()),
     }
 }
 

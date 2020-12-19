@@ -27,6 +27,24 @@ impl FromStr for Format {
     }
 }
 
+#[derive(Debug)]
+pub enum ScoringAlgorithm {
+    Standard,
+    Length,
+}
+
+impl FromStr for ScoringAlgorithm {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_ref() {
+            "standard" => Ok(ScoringAlgorithm::Standard),
+            "length" => Ok(ScoringAlgorithm::Length),
+            v => Err(format!("Unknown scoring algorithm: {}", v)),
+        }
+    }
+}
+
 #[derive(Debug, StructOpt)]
 #[structopt(
     name = "complexity",
@@ -51,4 +69,8 @@ pub struct Flags {
     /// Format output
     #[structopt(long, possible_values = &["standard", "csv", "json"], default_value = "standard", case_insensitive = true)]
     pub format: Format,
+
+    /// Scoring algorithm
+    #[structopt(short = "s", long, possible_values = &["standard", "length"], default_value = "standard", case_insensitive = true)]
+    pub scorer: ScoringAlgorithm,
 }
