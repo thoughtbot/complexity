@@ -19,7 +19,7 @@ in the paper – especially avoiding calculating cyclomatic complexity ([McCabe
 given requirements of AST parsing and analysis due to time and language
 requirements – are of considerable overlap.
 
-[this paper]: https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.68.3558&rep=rep1&type=pdf
+[this paper]: https://doi.org/10.1016/j.scico.2009.02.005
 [McCabe]: https://en.wikipedia.org/wiki/Cyclomatic_complexity
 
 ## Installation
