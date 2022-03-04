@@ -1,6 +1,6 @@
 [package]
 name = "complexity"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Joshua Clayton <joshua.clayton@gmail.com>"]
 edition = "2018"
 license = "MIT"
