@@ -31,6 +31,14 @@ brew tap thoughtbot/formulae
 brew install complexity
 ```
 
+*Note*
+On the new M1 mac architecture you may find that complexity cannot be installed
+and throws a build error. You may want to try to re-install without mimalloc
+```sh
+brew uninstall complexity
+brew install complexity --without-mimalloc
+```
+
 ## Configuration
 
 `complexity` has configuration options to ignore certain file extensions or
