@@ -12,8 +12,6 @@ pub struct ParsedFile {
 
 pub enum ParsedFileError {
     IoError(std::io::Error),
-    IncompleteParse,
-    FailedParse,
 }
 
 impl From<std::io::Error> for ParsedFileError {
@@ -28,11 +26,7 @@ impl ParsedFile {
         path: PathBuf,
     ) -> Result<Self, ParsedFileError> {
         let contents = get_file_contents(&path)?;
-        let stats = match parser::parse_file(&contents) {
-            Ok(("", stats)) => Ok(stats),
-            Ok(_) => Err(ParsedFileError::IncompleteParse),
-            Err(_) => Err(ParsedFileError::FailedParse),
-        }?;
+        let stats = parser::parse_file(&contents);
         let complexity_score = scoring::score(scorer, &stats);
 
         Ok(ParsedFile {
