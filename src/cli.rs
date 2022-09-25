@@ -76,12 +76,16 @@ fn build_scorer(algorithm: &flags::ScoringAlgorithm) -> Box<dyn scoring::ScoreVi
 }
 
 fn render_standard(results: &[ParsedFile]) {
+    use std::io::Write;
+    let mut lock = std::io::stdout().lock();
     for parsed_file in results {
-        println!(
+        writeln!(
+            lock,
             "{:>8} {}",
             format!("{:.2}", parsed_file.complexity_score),
             parsed_file.path.display()
-        );
+        )
+        .unwrap();
     }
 }
 
