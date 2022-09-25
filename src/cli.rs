@@ -36,6 +36,7 @@ fn calculate_complexity(flags: flags::Flags) {
         .for_each(|i| files_filter.only_paths.push(i));
 
     builder.filter_entry(move |e| files_filter.matches(e.path()));
+    builder.threads(num_cpus::get());
 
     let mut results = vec![];
     let scorer = &flags.scorer;
