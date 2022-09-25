@@ -1,8 +1,8 @@
 use crate::*;
+use crossbeam_channel::unbounded;
 use ignore::{DirEntry, WalkBuilder, WalkState};
 use serde_json;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 
 pub fn run() {
@@ -37,22 +37,29 @@ fn calculate_complexity(flags: flags::Flags) {
 
     builder.filter_entry(move |e| files_filter.matches(e.path()));
 
-    let results = Arc::new(Mutex::new(vec![]));
-    let scorer = flags.scorer;
+    let mut results = vec![];
+    let scorer = &flags.scorer;
+
+    let (sender, receiver) = unbounded();
 
     builder.build_parallel().run(|| {
-        Box::new(|result| {
+        let sender = sender.clone();
+
+        Box::new(move |result| {
             let mut scorer = build_scorer(&scorer);
             if let Some(parsed_file) = parse_dir_entry(&mut scorer, result) {
-                let mut results = results.lock().unwrap();
-                results.push(parsed_file);
+                sender.send(parsed_file).unwrap();
             }
 
             WalkState::Continue
         })
     });
 
-    let results = results.lock().unwrap();
+    drop(sender);
+
+    while let Ok(parsed_file) = receiver.recv() {
+        results.push(parsed_file);
+    }
 
     match flags.format {
         flags::Format::Standard => render_standard(&results),
