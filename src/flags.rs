@@ -1,13 +1,13 @@
+use clap::{Parser, Subcommand, ValueEnum};
 use std::str::FromStr;
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Subcommand)]
 pub enum Command {
     /// Write the default YAML configuration to the configuration directory
     InstallConfiguration,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum Format {
     Standard,
     Csv,
@@ -27,7 +27,7 @@ impl FromStr for Format {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum ScoringAlgorithm {
     Standard,
     Length,
@@ -45,32 +45,29 @@ impl FromStr for ScoringAlgorithm {
     }
 }
 
-#[derive(Debug, StructOpt)]
-#[structopt(
-    name = "complexity",
-    about = "A command line tool to identify complex code",
-    setting = structopt::clap::AppSettings::ColoredHelp
-)]
+#[derive(Debug, Parser)]
+#[clap(name = "complexity")]
+#[clap(about = "A command line tool to identify complex code", long_about = None)]
 pub struct Flags {
     /// Ignore files/directories matching the provided value
     ///
     /// This supports providing multiple values with a comma-delimited list
-    #[structopt(long, use_delimiter = true)]
+    #[clap(long, value_delimiter = ',')]
     pub ignore: Vec<String>,
     /// Only files/directories matching the provided value
     ///
     /// This supports providing multiple values with a comma-delimited list
-    #[structopt(long, use_delimiter = true)]
+    #[clap(long, value_delimiter = ',')]
     pub only: Vec<String>,
 
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     pub cmd: Option<Command>,
 
     /// Format output
-    #[structopt(long, possible_values = &["standard", "csv", "json"], default_value = "standard", case_insensitive = true)]
+    #[clap(long, value_parser, default_value = "standard")]
     pub format: Format,
 
     /// Scoring algorithm
-    #[structopt(short = "s", long, possible_values = &["standard", "length"], default_value = "standard", case_insensitive = true)]
+    #[clap(short, long, value_parser, default_value = "standard")]
     pub scorer: ScoringAlgorithm,
 }

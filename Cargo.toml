@@ -9,7 +9,6 @@ license = "MIT"
 
 [dependencies]
 ignore = "0.4"
-structopt = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 serde_json = "1.0"
@@ -17,6 +16,7 @@ dirs-next = "2.0"
 mimalloc = { version = "*", default-features = false, optional = true }
 crossbeam-channel = "0.5"
 num_cpus = "1.0"
+clap = { version = "4", features = ["derive"] }
 
 [dev-dependencies]
 approx = "0.4"

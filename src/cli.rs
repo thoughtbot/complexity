@@ -1,12 +1,12 @@
 use crate::*;
+use clap::Parser;
 use crossbeam_channel::unbounded;
 use ignore::{DirEntry, WalkBuilder, WalkState};
 use serde_json;
 use std::collections::HashMap;
-use structopt::StructOpt;
 
 pub fn run() {
-    let flags = flags::Flags::from_args();
+    let flags = flags::Flags::parse();
 
     match flags.cmd {
         Some(flags::Command::InstallConfiguration) => match configuration::install() {
