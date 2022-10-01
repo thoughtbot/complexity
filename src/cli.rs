@@ -27,13 +27,13 @@ fn calculate_complexity(flags: flags::Flags) {
 
     flags
         .ignore
-        .into_iter()
-        .for_each(|i| files_filter.ignored_paths.push(i));
+        .iter()
+        .for_each(|i| files_filter.ignored_paths.push(i.into()));
 
     flags
         .only
-        .into_iter()
-        .for_each(|i| files_filter.only_paths.push(i));
+        .iter()
+        .for_each(|i| files_filter.only_paths.push(i.into()));
 
     builder.filter_entry(move |e| files_filter.matches(e.path()));
     builder.threads(num_cpus::get());
