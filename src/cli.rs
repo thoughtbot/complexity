@@ -19,22 +19,7 @@ pub fn run() {
 
 fn calculate_complexity(flags: flags::Flags) {
     let mut builder = WalkBuilder::new("./");
-    let parsed_value =
-        configuration::load_and_parse_config().and_then(|v| IgnoredFilter::from_file(&v).ok());
-    let mut files_filter: FilesFilter = parsed_value
-        .map(|v| v.into())
-        .unwrap_or(FilesFilter::default());
-
-    flags
-        .ignore
-        .iter()
-        .for_each(|i| files_filter.ignored_paths.push(i.into()));
-
-    flags
-        .only
-        .iter()
-        .for_each(|i| files_filter.only_paths.push(i.into()));
-
+    let files_filter = build_files_filter(&flags);
     builder.filter_entry(move |e| files_filter.matches(e.path()));
     builder.threads(num_cpus::get());
 
@@ -67,6 +52,26 @@ fn calculate_complexity(flags: flags::Flags) {
         flags::Format::Csv => render_csv(&results),
         flags::Format::Json => render_json(&results),
     }
+}
+
+fn build_files_filter(flags: &flags::Flags) -> FilesFilter {
+    let parsed_value =
+        configuration::load_and_parse_config().and_then(|v| IgnoredFilter::from_file(&v).ok());
+    let mut files_filter: FilesFilter = parsed_value
+        .map(|v| v.into())
+        .unwrap_or(FilesFilter::default());
+
+    flags
+        .ignore
+        .iter()
+        .for_each(|i| files_filter.ignored_paths.push(i.into()));
+
+    flags
+        .only
+        .iter()
+        .for_each(|i| files_filter.only_paths.push(i.into()));
+
+    files_filter
 }
 
 fn build_scorer(algorithm: &flags::ScoringAlgorithm) -> Box<dyn scoring::ScoreVisitor> {
