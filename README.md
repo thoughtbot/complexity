@@ -92,6 +92,17 @@ Within the [Discourse codebase], for example, here's what the output might look 
 Additionally, you can limit results by substring with the `--only` flag, or
 modify paths to ignore with `--ignore`.
 
+```sh
+// This filters the .rs files inside all directories and outputs scores in a json format
+complexity --format json --only .rs
+
+// This filters the .rs and .md files inside all directories
+complexity --only .rs,.md
+
+// This filters all the files inside src/scoring directory
+complexity --only src/scoring
+```
+
 You can view the full suite of options by running `complexity help`.
 
 ## License

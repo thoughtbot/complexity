@@ -57,6 +57,8 @@ pub struct Flags {
     /// Only files/directories matching the provided value
     ///
     /// This supports providing multiple values with a comma-delimited list
+    ///
+    /// Example: --only .rs,.md
     #[clap(long, value_delimiter = ',')]
     pub only: Vec<String>,
 
